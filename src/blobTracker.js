@@ -64,17 +64,23 @@ export class BlobTracker {
             lightTheme = false,
         } = settings;
 
-        const w = this.overlay.width;
-        const h = this.overlay.height;
-        this.ctx.clearRect(0, 0, w, h);
+        const physW = this.overlay.width;
+        const physH = this.overlay.height;
+        const dpr = this.overlay.clientWidth > 0 ? physW / this.overlay.clientWidth : 1;
+        const w = physW / dpr;
+        const h = physH / dpr;
 
-        if (!blobEnabled || w === 0 || h === 0) {
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(0, 0, physW, physH);
+
+        if (!blobEnabled || physW === 0 || physH === 0) {
             this.trackedBlobs = [];
             return;
         }
 
         const now = performance.now();
         if (now - this.lastSampleTime < blobUpdateMs && this.trackedBlobs.length > 0) {
+            this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             this.drawOverlay(w, h, {
                 blobStyle,
                 blobConnectLines,
@@ -273,6 +279,7 @@ export class BlobTracker {
 
         this.trackedBlobs = nextTracked;
 
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         this.drawOverlay(w, h, {
             blobStyle,
             blobConnectLines,

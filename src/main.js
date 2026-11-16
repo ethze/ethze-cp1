@@ -67,8 +67,8 @@ const DEFAULT_SETTINGS = {
     blobShowTrails: false,
     blobColor: '#909090',
     // Performance
-    renderScale: 0.85,
-    trailScale: 0.55,
+    renderScale: 1.0,
+    trailScale: 0.5,
     blobUpdateMs: 33,
     lightTheme: false,
 };
@@ -127,10 +127,11 @@ let activeCanvas = canvas;
 let renderer = null;
 
 function handleResize() {
-    const rw = Math.max(1, Math.floor(window.innerWidth * state.renderScale));
-    const rh = Math.max(1, Math.floor(window.innerHeight * state.renderScale));
-    blobCanvas.width = window.innerWidth;
-    blobCanvas.height = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rw = Math.max(1, Math.floor(window.innerWidth * dpr * state.renderScale));
+    const rh = Math.max(1, Math.floor(window.innerHeight * dpr * state.renderScale));
+    blobCanvas.width = Math.max(1, Math.floor(window.innerWidth * dpr));
+    blobCanvas.height = Math.max(1, Math.floor(window.innerHeight * dpr));
     if (renderer) {
         renderer.resize(rw, rh, state.trailScale);
     }
