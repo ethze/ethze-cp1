@@ -1,12 +1,9 @@
 import { WebGPURenderer } from './webgpuRenderer.js';
 import { WebGLRenderer } from './webglRenderer.js';
 import { generateLogoFromText } from './logoGenerator.js';
-import { BlobTracker } from './blobTracker.js';
 
 const canvas = document.getElementById('canvas');
-const blobCanvas = document.getElementById('blob-canvas');
 const themeToggleBtn = document.getElementById('theme-toggle');
-const blobTracker = new BlobTracker(blobCanvas);
 
 function hexToVec3(hex) {
     const clean = hex.replace('#', '');
@@ -53,23 +50,9 @@ const DEFAULT_SETTINGS = {
     glowTurbulence: 0.4,
     dither: 0,
     showRawLogo: false,
-    // Blob Tracking (TouchDesigner)
-    blobEnabled: true,
-    blobStyle: 'Full Box',
-    blobThreshold: 0.34,
-    blobMaxCount: 7,
-    blobMaxSize: 70,
-    blobLogoDynamic: 0.65,
-    blobConnectLines: true,
-    blobConnectMode: 'All Blobs',
-    blobLinkDistance: 220,
-    blobShowLabels: true,
-    blobShowTrails: false,
-    blobColor: '#909090',
     // Performance
     renderScale: 1.0,
     trailScale: 0.5,
-    blobUpdateMs: 33,
     lightTheme: false,
 };
 
@@ -130,8 +113,6 @@ function handleResize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const rw = Math.max(1, Math.floor(window.innerWidth * dpr * state.renderScale));
     const rh = Math.max(1, Math.floor(window.innerHeight * dpr * state.renderScale));
-    blobCanvas.width = Math.max(1, Math.floor(window.innerWidth * dpr));
-    blobCanvas.height = Math.max(1, Math.floor(window.innerHeight * dpr));
     if (renderer) {
         renderer.resize(rw, rh, state.trailScale);
     }
@@ -187,10 +168,6 @@ function render() {
                 glowRedVec: hexToVec3(state.glowRed),
                 glowBlueVec: hexToVec3(state.glowBlue),
             });
-            blobTracker.updateAndDraw(activeCanvas, simTime, state.logoScale, state.logoRatio, {
-                ...state,
-                blobColor: state.lightTheme ? '#111827' : state.blobColor,
-            });
         } catch (err) {
             if (renderer.backendName === 'WebGPU') {
                 console.warn('WebGPU runtime error, falling back to WebGL:', err);
@@ -239,7 +216,6 @@ async function initStartup() {
         gradientStrength: state.gradientStrength,
     });
     state.logoRatio = logoResult.ratio;
-    blobTracker.setLogoMask(logoResult.data, logoResult.width, logoResult.height);
     renderer.setLogoData(logoResult.data, logoResult.width, logoResult.height);
 
     requestAnimationFrame(render);
